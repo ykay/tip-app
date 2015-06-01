@@ -11,15 +11,27 @@ import UIKit
 class SettingsViewController: UIViewController {
     @IBOutlet weak var defaultTipControl: UISegmentedControl!
     
+    var userDefaults = NSUserDefaults()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
-        var ud = NSUserDefaults.standardUserDefaults()
-
-        var defaultTipIndex = ud.integerForKey(Global.Settings.DefaultTipIndexKey)
         
-        defaultTipControl.selectedSegmentIndex = defaultTipIndex
+        var defaultTipIndex = userDefaults.integerForKey(Global.Settings.DefaultTipIndexKey)
+        var selectedCountryIndex = userDefaults.integerForKey(Global.Settings.LastSetCountryIndexKey)
+        
+        defaultTipControl.removeAllSegments()
+        for (index, element) in enumerate(cultures[selectedCountryIndex].tipRates) {
+            defaultTipControl.insertSegmentWithTitle(NSString(format: "%.2f", element), atIndex: index, animated: false)
+        }
+        
+        if (defaultTipIndex == -1) {
+            defaultTipControl.selectedSegmentIndex = 0
+            userDefaults.setInteger(0, forKey: Global.Settings.DefaultTipIndexKey)
+            userDefaults.setInteger(0, forKey: Global.Settings.LastSetTipIndexKey)
+        }
+        else {
+            defaultTipControl.selectedSegmentIndex = defaultTipIndex
+        }
     }
     @IBAction func onDefaultTipChanged(sender: AnyObject) {
         let ud = NSUserDefaults.standardUserDefaults()

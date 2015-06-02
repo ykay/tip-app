@@ -39,6 +39,8 @@ class ViewController: UIViewController {
     @IBOutlet weak var countryPicker: UIPickerView!
     @IBOutlet weak var billFieldSymbol: UILabel!
     @IBOutlet weak var resultView: UIView!
+    @IBOutlet weak var currentCurrencyCodeLabel: UILabel!
+    @IBOutlet weak var currentExchangeRateLabel: UILabel!
     
     var userDefaults = NSUserDefaults()
     var currencyFormatter = NSNumberFormatter()
@@ -47,12 +49,19 @@ class ViewController: UIViewController {
     var inputBillAmount = Float()
     
     // Suggested tips (ref): http://www.businessinsider.com/world-tipping-guide-2015-5
+    // Example getting info about NSLocale object (ref): http://stackoverflow.com/questions/6177309/nslocale-and-country-name
     func initializeValues() {
-        cultures.append(Country(name: "United States", exchangeRate: 1, tipRates: [ 0.15, 0.18, 0.20 ], localeIdentifier: "en_US"))
-        cultures.append(Country(name: "France", exchangeRate: 0.918948723, tipRates: [ 0.10 ], localeIdentifier: "fr_FR"))
-        cultures.append(Country(name: "Czech Republic", exchangeRate: 24.9507223, tipRates: [ 0.10, 0.13, 0.15 ], localeIdentifier: "cs_CZ"))
-        cultures.append(Country(name: "Japan", exchangeRate: 123.061777, tipRates: [ 0 ], localeIdentifier: "ja_JP"))
+        var allLocales:Array<String> = NSLocale.availableLocaleIdentifiers() as Array<String>
+    
+        for localeId in allLocales {
+            var countryName = getCountryNameFromLocaleIdentifier(localeId)
+            if (countryName != "") {
+                cultures.append(Country(name: countryName, exchangeRate: 1.0, tipRates: [ 0.15, 0.18, 0.20 ], localeIdentifier: localeId))
+            }
+
+        }
     }
+    
     // Initialization
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -72,6 +81,7 @@ class ViewController: UIViewController {
         
         currencyFormatter.numberStyle = .CurrencyStyle
         currencyFormatter.locale = NSLocale(localeIdentifier: cultures[selectedCountryIndex].localeIdentifier)
+        // Lenient helps make converting the formatted string into a number possible. If not set, parsing will fail.
         currencyFormatter.lenient = true
         
         if (inputBillAmount != 0) {
@@ -92,20 +102,29 @@ class ViewController: UIViewController {
         populateFields(false)
     }
     
+    func showExchangeRateInfo() {
+        resultView.hidden = false
+        UIView.animateWithDuration(0.5, delay: 0.5, options: UIViewAnimationOptions.CurveEaseOut, animations: {
+            self.currentExchangeRateLabel.alpha = 1.0
+            }, completion: nil)
+    }
+    
+    func hideExchangeRateInfo() {
+        UIView.animateWithDuration(0.5, delay: 0.5, options: UIViewAnimationOptions.CurveEaseOut, animations: {
+            self.currentExchangeRateLabel.alpha = 0.0
+            }, completion: nil)
+    }
+    
     func showEverythingElse() {
         resultView.hidden = false
         UIView.animateWithDuration(0.5, delay: 0.5, options: UIViewAnimationOptions.CurveEaseOut, animations: {
-            
             self.resultView.alpha = 1.0
-            
             }, completion: nil)
     }
     
     func hideEverythingElse() {
         UIView.animateWithDuration(0.5, delay: 0.5, options: UIViewAnimationOptions.CurveEaseOut, animations: {
-            
             self.resultView.alpha = 0.0
-            
             }, completion: nil)
     }
     
@@ -156,17 +175,25 @@ class ViewController: UIViewController {
     func pickerView(pickerView: UIPickerView!, didSelectRow row: Int, inComponent component: Int){
         currencyFormatter.locale = NSLocale(localeIdentifier: cultures[row].localeIdentifier)
         
+        hideExchangeRateInfo()
+        
         var billAmount = inputBillAmount
+        var exchangeRate = getExchangeRateFromLocaleIdentifier(cultures[row].localeIdentifier)
+        
+        currentCurrencyCodeLabel.text = getCurrencyCode(cultures[row].localeIdentifier)
+        currentExchangeRateLabel.text = NSString(format: "(%.5f)", exchangeRate)
+        
+        showExchangeRateInfo()
         
         if (row == inputCountryIndex) {
             billAmount = inputBillAmount
         }
         else if (selectedCountryIndex == 0) {
-            billAmount = billAmount * cultures[row].exchangeRate
+            billAmount = billAmount * exchangeRate
         }
         else {
             billAmount = billAmount / cultures[selectedCountryIndex].exchangeRate
-            billAmount = billAmount * cultures[row].exchangeRate
+            billAmount = billAmount * exchangeRate
         }
         
         if (billAmount==0) {
@@ -216,6 +243,69 @@ class ViewController: UIViewController {
         
         tipLabel.text = currencyFormatter.stringFromNumber(tip)
         totalLabel.text = currencyFormatter.stringFromNumber(total)
+    }
+    func getCurrencyCode(localeIdentifier: String) -> String {        var locale = NSLocale(localeIdentifier: localeIdentifier)
+        var currencyCode : String? = locale.objectForKey(NSLocaleCurrencyCode) as? String
+        if currencyCode == nil { return "" }
+        
+        return currencyCode!
+    }
+    // (Ref) Making Synchronous Http Request: http://stackoverflow.com/questions/24016142/how-to-make-an-http-request-in-swift
+    // Yahoo API Example: "http://query.yahooapis.com/v1/public/yql?q=select * from yahoo.finance.xchange where pair in ("USDEUR")&env=store://datatables.org/alltableswithkeys"
+    func getExchangeRateFromLocaleIdentifier(localeIdentifier: String) -> Float {
+        var locale = NSLocale(localeIdentifier: localeIdentifier)
+        var exchangeRate:Float = 1.0 // Default if we cannot get it (i.e. no internet)
+        
+        // e.g. USD, ZMW, YEN
+        var currencyCode = getCurrencyCode(localeIdentifier)
+        
+        // Construct url for getting exchange rate json (from Yahoo Apis)
+        var requestUrl = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%20in%20(%22USD\(currencyCode)%22)&env=store://datatables.org/alltableswithkeys&format=json"
+        
+        let url = NSURL(string: requestUrl)
+        if (url != nil) {
+            var request1: NSURLRequest = NSURLRequest(URL: url!)
+            var response: AutoreleasingUnsafeMutablePointer<NSURLResponse?>=nil
+            var error: NSErrorPointer = nil
+            var data: NSData =  NSURLConnection.sendSynchronousRequest(request1, returningResponse: response, error:nil)!
+            
+            var parseError: NSError?
+            let parsedObject: AnyObject? = NSJSONSerialization.JSONObjectWithData(data,
+                options: NSJSONReadingOptions.AllowFragments,
+                error:&parseError)
+            
+            if let rootObj = parsedObject as? NSDictionary {
+                if let queryObj = rootObj["query"] as? NSDictionary {
+                    if let resultsObj = queryObj["results"] as? NSDictionary {
+                        if let rateObj = resultsObj["rate"] as? NSDictionary {
+                            if let rate = rateObj["Rate"] as? NSString {
+                                exchangeRate = rate.floatValue
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return exchangeRate
+    }
+    func getCountryNameFromLocaleIdentifier(localeIdentifier: String) -> String {
+        // Because we want the name in English
+        var usLocale = NSLocale(localeIdentifier: "en_US")
+        var countryName = String()
+        
+        var locale = NSLocale(localeIdentifier: localeIdentifier)
+        var countryCode : String? = locale.objectForKey(NSLocaleCountryCode) as? String
+        if countryCode == nil { return "" }
+        
+        var tmpName : String? = usLocale.displayNameForKey(NSLocaleCountryCode, value: countryCode!)
+        if tmpName == nil {return ""}
+        else {
+            // Force unwrap it because we know it contains a value
+            countryName = tmpName!
+        }
+
+        return countryName
     }
 }
 

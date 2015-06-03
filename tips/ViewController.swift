@@ -13,9 +13,13 @@ struct Global {
         static let DefaultTipIndexKey = "defaultTipIndex"
         static let DefaultTipIndex = 0
         
-        static let LastSetCountryIndexKey = "lastSetCountryIndexKey"
-        static let LastSetBillAmountKey = "lastSetBillAmountKey"
-        static let LastSetTipIndexKey = "lastSetTipIndexKey"
+        static let LastTimeAppRanKey = "lastTimeAppRan"
+        static let LastInputCountryIndexKey = "lastInputCountryIndex"
+        static let LastInputBillAmountKey = "lastInputBillAmount"
+        static let LastSetCountryIndexKey = "lastSetCountryIndex"
+        static let LastSetBillAmountKey = "lastSetBillAmount"
+        static let LastSetTipIndexKey = "lastSetTipIndex"
+        static let LastSetExchangeRateKey = "lastSetExchangeRate"
     }
     
     static let ActiveCountryIndex = 0
@@ -41,12 +45,14 @@ class ViewController: UIViewController {
     @IBOutlet weak var resultView: UIView!
     @IBOutlet weak var currentCurrencyCodeLabel: UILabel!
     @IBOutlet weak var currentExchangeRateLabel: UILabel!
+    @IBOutlet weak var inputCurrencyCodeLabel: UILabel!
     
     var userDefaults = NSUserDefaults()
     var currencyFormatter = NSNumberFormatter()
     
     var inputCountryIndex = 0
     var inputBillAmount = Float()
+    var inputLocaleIdentifier = String()
     
     // Suggested tips (ref): http://www.businessinsider.com/world-tipping-guide-2015-5
     // Example getting info about NSLocale object (ref): http://stackoverflow.com/questions/6177309/nslocale-and-country-name
@@ -65,27 +71,53 @@ class ViewController: UIViewController {
     // Initialization
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         // Do any additional setup after loading the view, typically from a nib.
+        var resetValues = true
         
         // Initialize tip rates based on culture
         initializeValues()
         
         billField.becomeFirstResponder()
         
-        // Set country, bill amount, and tip to what it was last set to
-        selectedCountryIndex = userDefaults.integerForKey(Global.Settings.LastSetCountryIndexKey)
-        inputCountryIndex = selectedCountryIndex
-        countryPicker.selectRow(selectedCountryIndex, inComponent: 0, animated: false)
+        // See if we should use last set values or just reset everything (after 10 minutes of non-use)
+        if let lastTimeAppRan = userDefaults.objectForKey(Global.Settings.LastTimeAppRanKey) as? NSDate {
+            let elapsedTime = NSDate().timeIntervalSinceDate(lastTimeAppRan as NSDate)
+            if ((elapsedTime / 60) < 10) {
+                resetValues = false
+            }
+        }
         
-        inputBillAmount = userDefaults.floatForKey(Global.Settings.LastSetBillAmountKey)
+        if (!resetValues)
+        {
+            // Set country, bill amount, and tip to what it was last set to
+            selectedCountryIndex = userDefaults.integerForKey(Global.Settings.LastSetCountryIndexKey)
+            inputCountryIndex = userDefaults.integerForKey(Global.Settings.LastInputCountryIndexKey)
+            countryPicker.selectRow(selectedCountryIndex, inComponent: 0, animated: false)
+            
+            inputBillAmount = userDefaults.floatForKey(Global.Settings.LastInputBillAmountKey)
+            billField.text = NSString(format: "%.2f", userDefaults.floatForKey(Global.Settings.LastSetBillAmountKey))
+        }
+        else {
+            selectedCountryIndex = 105
+            inputCountryIndex = selectedCountryIndex
+            countryPicker.selectRow(selectedCountryIndex, inComponent: 0, animated: false)
+            
+            inputBillAmount = 0
+        }
+        
+        inputLocaleIdentifier = cultures[inputCountryIndex].localeIdentifier
+        inputCurrencyCodeLabel.text = getCurrencyCode(inputLocaleIdentifier)
         
         currencyFormatter.numberStyle = .CurrencyStyle
         currencyFormatter.locale = NSLocale(localeIdentifier: cultures[selectedCountryIndex].localeIdentifier)
         // Lenient helps make converting the formatted string into a number possible. If not set, parsing will fail.
         currencyFormatter.lenient = true
         
-        if (inputBillAmount != 0) {
-            billField.text = NSString(format: "%.2f", inputBillAmount)
+        currentCurrencyCodeLabel.text = getCurrencyCode(cultures[selectedCountryIndex].localeIdentifier)
+        
+        if let currentExchangeRate = userDefaults.stringForKey(Global.Settings.LastSetExchangeRateKey) {
+            currentExchangeRateLabel.text = currentExchangeRate
         }
         
         tipControl.removeAllSegments()
@@ -144,9 +176,13 @@ class ViewController: UIViewController {
     @IBAction func onEditingChanged(sender: AnyObject) {
         inputCountryIndex = selectedCountryIndex
         inputBillAmount = (billField.text as NSString).floatValue
-
-        userDefaults.setInteger(inputCountryIndex, forKey: Global.Settings.LastSetCountryIndexKey)
-        userDefaults.setFloat(inputBillAmount, forKey: Global.Settings.LastSetBillAmountKey)
+        inputLocaleIdentifier = cultures[inputCountryIndex].localeIdentifier
+        
+        userDefaults.setInteger(inputCountryIndex, forKey: Global.Settings.LastInputCountryIndexKey)
+        userDefaults.setFloat(inputBillAmount, forKey: Global.Settings.LastInputBillAmountKey)
+        
+        // Update label for input currency name
+        inputCurrencyCodeLabel.text = getCurrencyCode(inputLocaleIdentifier)
         
         populateFields(false)
     }
@@ -178,22 +214,30 @@ class ViewController: UIViewController {
         hideExchangeRateInfo()
         
         var billAmount = inputBillAmount
-        var exchangeRate = getExchangeRateFromLocaleIdentifier(cultures[row].localeIdentifier)
+        if let exchangeRate = getExchangeRateFromLocaleIdentifier(cultures[row].localeIdentifier) {
         
-        currentCurrencyCodeLabel.text = getCurrencyCode(cultures[row].localeIdentifier)
-        currentExchangeRateLabel.text = NSString(format: "(%.5f)", exchangeRate)
-        
-        showExchangeRateInfo()
-        
-        if (row == inputCountryIndex) {
-            billAmount = inputBillAmount
-        }
-        else if (selectedCountryIndex == 0) {
-            billAmount = billAmount * exchangeRate
+            currentCurrencyCodeLabel.text = getCurrencyCode(cultures[row].localeIdentifier)
+            currentExchangeRateLabel.text = NSString(format: "(%.5f)", exchangeRate)
+            
+            showExchangeRateInfo()
+            
+            if (row == inputCountryIndex) {
+                billAmount = inputBillAmount
+            }
+            else if (selectedCountryIndex == 0) {
+                billAmount = billAmount * exchangeRate
+            }
+            else {
+                billAmount = billAmount / cultures[selectedCountryIndex].exchangeRate
+                billAmount = billAmount * exchangeRate
+            }
+            
         }
         else {
-            billAmount = billAmount / cultures[selectedCountryIndex].exchangeRate
-            billAmount = billAmount * exchangeRate
+            currentExchangeRateLabel.text = "(could not retrieve exchange rate)"
+
+            // We couldn't get the exchange rate (i.e. no internet); Set the billAmount to unconverted input value
+            billAmount = inputBillAmount
         }
         
         if (billAmount==0) {
@@ -206,6 +250,7 @@ class ViewController: UIViewController {
         // Save new country to last set values
         userDefaults.setInteger(row, forKey: Global.Settings.LastSetCountryIndexKey)
         userDefaults.setFloat(billAmount, forKey: Global.Settings.LastSetBillAmountKey)
+        userDefaults.setObject(currentExchangeRateLabel.text, forKey: Global.Settings.LastSetExchangeRateKey)
         
         // Save current index so we know how to calculate the next conversion
         selectedCountryIndex = row
@@ -252,15 +297,16 @@ class ViewController: UIViewController {
     }
     // (Ref) Making Synchronous Http Request: http://stackoverflow.com/questions/24016142/how-to-make-an-http-request-in-swift
     // Yahoo API Example: "http://query.yahooapis.com/v1/public/yql?q=select * from yahoo.finance.xchange where pair in ("USDEUR")&env=store://datatables.org/alltableswithkeys"
-    func getExchangeRateFromLocaleIdentifier(localeIdentifier: String) -> Float {
+    func getExchangeRateFromLocaleIdentifier(localeIdentifier: String) -> Float? {
         var locale = NSLocale(localeIdentifier: localeIdentifier)
-        var exchangeRate:Float = 1.0 // Default if we cannot get it (i.e. no internet)
+        var exchangeRate:Float? // Default to nil
         
         // e.g. USD, ZMW, YEN
         var currencyCode = getCurrencyCode(localeIdentifier)
+        var inputCurrencyCode = getCurrencyCode(inputLocaleIdentifier)
         
         // Construct url for getting exchange rate json (from Yahoo Apis)
-        var requestUrl = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%20in%20(%22USD\(currencyCode)%22)&env=store://datatables.org/alltableswithkeys&format=json"
+        var requestUrl = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%20in%20(%22\(inputCurrencyCode)\(currencyCode)%22)&env=store://datatables.org/alltableswithkeys&format=json"
         
         let url = NSURL(string: requestUrl)
         if (url != nil) {

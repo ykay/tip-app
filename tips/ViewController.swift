@@ -131,6 +131,8 @@ class ViewController: UIViewController {
             userDefaults.setInteger(0, forKey: Global.Settings.LastSetTipIndexKey)
         }
         
+        updateExchangeRateAndBillAmount(selectedCountryIndex)
+        
         populateFields(false)
     }
     
@@ -187,6 +189,10 @@ class ViewController: UIViewController {
         populateFields(false)
     }
     
+    @IBAction func onEditingEnded(sender: AnyObject) {
+        updateExchangeRateAndBillAmount(selectedCountryIndex)
+    }
+    
     @IBAction func onTipChanged(sender: AnyObject) {
         userDefaults.setInteger(tipControl.selectedSegmentIndex, forKey: Global.Settings.LastSetTipIndexKey)
         populateFields(false)
@@ -208,21 +214,21 @@ class ViewController: UIViewController {
     func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String! {
         return cultures[row].name
     }
-    func pickerView(pickerView: UIPickerView!, didSelectRow row: Int, inComponent component: Int){
-        currencyFormatter.locale = NSLocale(localeIdentifier: cultures[row].localeIdentifier)
+    func updateExchangeRateAndBillAmount(countryIndex: Int) {
+        currencyFormatter.locale = NSLocale(localeIdentifier: cultures[countryIndex].localeIdentifier)
         
         hideExchangeRateInfo()
         
         var billAmount = inputBillAmount
-        if let exchangeRate = getExchangeRateFromLocaleIdentifier(cultures[row].localeIdentifier) {
-        
-            currentCurrencyCodeLabel.text = getCurrencyCode(cultures[row].localeIdentifier)
+        if let exchangeRate = getExchangeRateFromLocaleIdentifier(cultures[countryIndex].localeIdentifier) {
+            
+            currentCurrencyCodeLabel.text = getCurrencyCode(cultures[countryIndex].localeIdentifier)
             currentExchangeRateLabel.text = NSString(format: "(%.5f)", exchangeRate)
             
             showExchangeRateInfo()
             
-            if (row == inputCountryIndex) {
-                billAmount = inputBillAmount
+            if (countryIndex == inputCountryIndex) {
+                // billAmount is the inputBillAmount (already set).
             }
             else if (selectedCountryIndex == 0) {
                 billAmount = billAmount * exchangeRate
@@ -235,7 +241,7 @@ class ViewController: UIViewController {
         }
         else {
             currentExchangeRateLabel.text = "(could not retrieve exchange rate)"
-
+            
             // We couldn't get the exchange rate (i.e. no internet); Set the billAmount to unconverted input value
             billAmount = inputBillAmount
         }
@@ -246,11 +252,15 @@ class ViewController: UIViewController {
         else {
             billField.text = NSString(format: "%.2f", billAmount)
         }
-
+        
         // Save new country to last set values
-        userDefaults.setInteger(row, forKey: Global.Settings.LastSetCountryIndexKey)
+        userDefaults.setInteger(countryIndex, forKey: Global.Settings.LastSetCountryIndexKey)
         userDefaults.setFloat(billAmount, forKey: Global.Settings.LastSetBillAmountKey)
         userDefaults.setObject(currentExchangeRateLabel.text, forKey: Global.Settings.LastSetExchangeRateKey)
+
+    }
+    func pickerView(pickerView: UIPickerView!, didSelectRow row: Int, inComponent component: Int){
+        updateExchangeRateAndBillAmount(row)
         
         // Save current index so we know how to calculate the next conversion
         selectedCountryIndex = row

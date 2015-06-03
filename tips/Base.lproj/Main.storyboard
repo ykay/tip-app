@@ -43,6 +43,7 @@
                                 <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
                                 <connections>
                                     <action selector="onEditingChanged:" destination="vXZ-lx-hvc" eventType="editingChanged" id="1Sn-iI-Jvq"/>
+                                    <action selector="onEditingEnded:" destination="vXZ-lx-hvc" eventType="editingDidEnd" id="YW4-y7-tNW"/>
                                 </connections>
                             </textField>
                             <view contentMode="scaleToFill" id="swW-ei-FPd">

@@ -43,10 +43,31 @@ class ViewController: UIViewController {
     @IBOutlet weak var tipControl: UISegmentedControl!
     @IBOutlet weak var countryPicker: UIPickerView!
     @IBOutlet weak var billFieldSymbol: UILabel!
-    @IBOutlet weak var resultView: UIView!
     @IBOutlet weak var currentCurrencyCodeLabel: UILabel!
     @IBOutlet weak var currentExchangeRateLabel: UILabel!
     @IBOutlet weak var inputCurrencyCodeLabel: UILabel!
+    
+    @IBOutlet weak var tipTitleLabel: UILabel!
+    @IBOutlet weak var totalTitleLabel: UILabel!
+    @IBOutlet weak var inputReferenceLabel: UILabel!
+    
+    @IBOutlet weak var resultView: UIView!
+    @IBOutlet weak var countryPickerView: UIView!
+    
+    var defaultBackColor = UIColor(red: 249/255.0, green: 249/255.0, blue: 249/255.0, alpha: 1)
+    var defaultLightTextColor = UIColor(red: 164/255.0, green: 217/255.0, blue: 211/255.0, alpha: 1)
+    var defaultNormalTextColor = UIColor(red: 16/255.0, green: 133/255.0, blue: 117/255.0, alpha: 1)
+    var defaultDarkTextColor = UIColor(red: 4/255.0, green: 61/255.0, blue: 49/255.0, alpha: 1)
+
+    var defaultTitleNormalTextColor = UIColor(red: 98/255.0, green: 98/255.0, blue: 98/255.0, alpha: 1)
+    
+    var invertedBackColor = UIColor()
+    var invertedLightTextColor = UIColor()
+    var invertedNormalTextColor = UIColor()
+    var invertedDarkTextColor = UIColor()
+    var invertedTitleNormalTextColor = UIColor()
+    
+    var darkMode = false
     
     var userDefaults = NSUserDefaults()
     var currencyFormatter = NSNumberFormatter()
@@ -55,7 +76,59 @@ class ViewController: UIViewController {
     var inputBillAmount = Float()
     var inputLocaleIdentifier = String()
     
-    // Suggested tips (ref): http://www.businessinsider.com/world-tipping-guide-2015-5
+    func initializeUIValues() {
+        invertedBackColor = defaultDarkTextColor
+        invertedLightTextColor = defaultLightTextColor
+        invertedNormalTextColor = defaultBackColor
+        invertedDarkTextColor = defaultBackColor
+        
+        invertedTitleNormalTextColor = defaultBackColor
+    }
+    
+    func switchToDarkMode() {
+        UIView.animateWithDuration(0.5, delay: 0.5, options: UIViewAnimationOptions.CurveEaseOut, animations: {
+            self.resultView.backgroundColor = self.invertedBackColor
+            self.countryPickerView.backgroundColor = self.invertedBackColor
+            self.view.backgroundColor = self.invertedBackColor
+            }, completion: { (value: Bool) in
+            self.switchTextToDarkMode()
+            })
+
+        inputReferenceLabel.hidden = true
+        
+        darkMode = true
+    }
+    
+    func switchTextToDarkMode() {
+        UIView.animateWithDuration(0.5, delay: 0.5, options: UIViewAnimationOptions.CurveEaseOut, animations: {
+            self.tipTitleLabel.textColor = self.invertedTitleNormalTextColor
+            self.totalTitleLabel.textColor = self.invertedTitleNormalTextColor
+            self.billField.textColor = self.invertedLightTextColor
+            self.totalLabel.textColor = self.invertedLightTextColor
+            }, completion: nil)
+    }
+    
+    func switchToLightkMode() {
+        UIView.animateWithDuration(0.5, delay: 0.5, options: UIViewAnimationOptions.CurveEaseOut, animations: {
+            self.view.backgroundColor = self.defaultBackColor
+            self.resultView.backgroundColor = self.defaultBackColor
+            self.countryPickerView.backgroundColor = self.defaultBackColor
+            }, completion: { (value: Bool) in
+                self.switchTextToLightMode()
+            })
+        
+        darkMode = false
+    }
+    
+    func switchTextToLightMode() {
+        UIView.animateWithDuration(0.5, delay: 0.5, options: UIViewAnimationOptions.CurveEaseOut, animations: {
+            self.tipTitleLabel.textColor = self.defaultTitleNormalTextColor
+            self.totalTitleLabel.textColor = self.defaultTitleNormalTextColor
+            self.billField.textColor = self.defaultDarkTextColor
+            self.totalLabel.textColor = self.defaultDarkTextColor
+            }, completion: nil)
+    }
+
     // Example getting info about NSLocale object (ref): http://stackoverflow.com/questions/6177309/nslocale-and-country-name
     func initializeValues() {
         var allLocales:Array<String> = NSLocale.availableLocaleIdentifiers() as Array<String>
@@ -81,6 +154,8 @@ class ViewController: UIViewController {
         
         // Do any additional setup after loading the view, typically from a nib.
         var resetValues = true
+        
+        initializeUIValues()
         
         // Initialize tip rates based on culture
         initializeValues()
@@ -182,6 +257,12 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
 
+    @IBAction func onEditingBegan(sender: AnyObject) {
+        if (!darkMode) {
+            switchToDarkMode()
+        }
+    }
+    
     @IBAction func onEditingChanged(sender: AnyObject) {
         inputCountryIndex = selectedCountryIndex
         inputBillAmount = (billField.text as NSString).floatValue
@@ -197,6 +278,9 @@ class ViewController: UIViewController {
     }
     
     @IBAction func onEditingEnded(sender: AnyObject) {
+        if (darkMode) {
+            switchToLightkMode()
+        }
         updateExchangeRateAndBillAmount(selectedCountryIndex)
     }
     
@@ -260,6 +344,13 @@ class ViewController: UIViewController {
             billField.text = NSString(format: "%.2f", billAmount)
         }
         
+        if (countryIndex != inputCountryIndex) {
+            inputReferenceLabel.text = String("(\(inputCurrencyCodeLabel.text!): \(inputBillAmount))")
+            inputReferenceLabel.hidden = false
+        } else {
+            inputReferenceLabel.hidden = true
+        }
+        
         // Save new country to last set values
         userDefaults.setInteger(countryIndex, forKey: Global.Settings.LastSetCountryIndexKey)
         userDefaults.setFloat(billAmount, forKey: Global.Settings.LastSetBillAmountKey)
@@ -278,6 +369,9 @@ class ViewController: UIViewController {
     }
     
     // Helper functions
+    func invertBackgroundColor() {
+        
+    }
     func populateFields(){
         var tipPercentage = tipRates[tipControl.selectedSegmentIndex]
         

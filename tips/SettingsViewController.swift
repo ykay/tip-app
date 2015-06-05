@@ -20,7 +20,7 @@ class SettingsViewController: UIViewController {
         var selectedCountryIndex = userDefaults.integerForKey(Global.Settings.LastSetCountryIndexKey)
         
         defaultTipControl.removeAllSegments()
-        for (index, element) in enumerate(cultures[selectedCountryIndex].tipRates) {
+        for (index, element) in enumerate(tipRates) {
             defaultTipControl.insertSegmentWithTitle(NSString(format: "%.2f", element), atIndex: index, animated: false)
         }
         

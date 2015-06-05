@@ -28,11 +28,12 @@ struct Global {
 struct Country {
     var name = String()
     var exchangeRate:Float;
-    var tipRates = [Float]()
     var localeIdentifier = String()
 }
 
 var cultures: [Country] = [Country]()
+
+let tipRates: Array<Float> = [ 0.15, 0.18, 0.20 ]
 
 class ViewController: UIViewController {
 
@@ -58,14 +59,20 @@ class ViewController: UIViewController {
     // Example getting info about NSLocale object (ref): http://stackoverflow.com/questions/6177309/nslocale-and-country-name
     func initializeValues() {
         var allLocales:Array<String> = NSLocale.availableLocaleIdentifiers() as Array<String>
-    
+        // Tracks country names so we don't add duplicates
+        var duplicateFilter = Dictionary<String,Int>()
+        
         for localeId in allLocales {
             var countryName = getCountryNameFromLocaleIdentifier(localeId)
             if (countryName != "") {
-                cultures.append(Country(name: countryName, exchangeRate: 1.0, tipRates: [ 0.15, 0.18, 0.20 ], localeIdentifier: localeId))
+                if duplicateFilter[countryName] == nil {
+                    cultures.append(Country(name: countryName, exchangeRate: 1.0, localeIdentifier: localeId))
+                    duplicateFilter[countryName] = 1
+                }
             }
-
         }
+        
+        cultures = cultures.sorted { $0.name < $1.name }
     }
     
     // Initialization
@@ -99,7 +106,7 @@ class ViewController: UIViewController {
             billField.text = NSString(format: "%.2f", userDefaults.floatForKey(Global.Settings.LastSetBillAmountKey))
         }
         else {
-            selectedCountryIndex = 105
+            selectedCountryIndex = 237
             inputCountryIndex = selectedCountryIndex
             countryPicker.selectRow(selectedCountryIndex, inComponent: 0, animated: false)
             
@@ -121,7 +128,7 @@ class ViewController: UIViewController {
         }
         
         tipControl.removeAllSegments()
-        for (index, element) in enumerate(cultures[selectedCountryIndex].tipRates) {
+        for (index, element) in enumerate(tipRates) {
             tipControl.insertSegmentWithTitle(NSString(format: "%.2f", element), atIndex: index, animated: false)
         }
         
@@ -133,7 +140,7 @@ class ViewController: UIViewController {
         
         updateExchangeRateAndBillAmount(selectedCountryIndex)
         
-        populateFields(false)
+        populateFields()
     }
     
     func showExchangeRateInfo() {
@@ -186,7 +193,7 @@ class ViewController: UIViewController {
         // Update label for input currency name
         inputCurrencyCodeLabel.text = getCurrencyCode(inputLocaleIdentifier)
         
-        populateFields(false)
+        populateFields()
     }
     
     @IBAction func onEditingEnded(sender: AnyObject) {
@@ -195,7 +202,7 @@ class ViewController: UIViewController {
     
     @IBAction func onTipChanged(sender: AnyObject) {
         userDefaults.setInteger(tipControl.selectedSegmentIndex, forKey: Global.Settings.LastSetTipIndexKey)
-        populateFields(false)
+        populateFields()
     }
     
     @IBAction func onTap(sender: AnyObject) {
@@ -265,25 +272,14 @@ class ViewController: UIViewController {
         // Save current index so we know how to calculate the next conversion
         selectedCountryIndex = row
         
-        populateFields(true)
+        populateFields()
         
         self.view.endEditing(true)
     }
     
     // Helper functions
-    func populateFields(countryChanged: Bool){
-        // Populate tip rates
-        if (countryChanged) {
-            tipControl.removeAllSegments()
-            for (index, element) in enumerate(cultures[selectedCountryIndex].tipRates) {
-                tipControl.insertSegmentWithTitle(NSString(format: "%.2f", element), atIndex: index, animated: false)
-            }
-            
-            // Reset the selected tip rate because it's different per country
-            tipControl.selectedSegmentIndex = 0
-        }
-    
-        var tipPercentage = cultures[selectedCountryIndex].tipRates[tipControl.selectedSegmentIndex]
+    func populateFields(){
+        var tipPercentage = tipRates[tipControl.selectedSegmentIndex]
         
         var billAmount = (billField.text as NSString).floatValue
         var tip = billAmount * tipPercentage

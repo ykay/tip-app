@@ -108,7 +108,7 @@ class ViewController: UIViewController {
             }, completion: nil)
     }
     
-    func switchToLightkMode() {
+    func switchToLightMode() {
         UIView.animateWithDuration(0.5, delay: 0.5, options: UIViewAnimationOptions.CurveEaseOut, animations: {
             self.view.backgroundColor = self.defaultBackColor
             self.resultView.backgroundColor = self.defaultBackColor
@@ -279,7 +279,7 @@ class ViewController: UIViewController {
     
     @IBAction func onEditingEnded(sender: AnyObject) {
         if (darkMode) {
-            switchToLightkMode()
+            switchToLightMode()
         }
         updateExchangeRateAndBillAmount(selectedCountryIndex)
     }
@@ -369,9 +369,6 @@ class ViewController: UIViewController {
     }
     
     // Helper functions
-    func invertBackgroundColor() {
-        
-    }
     func populateFields(){
         var tipPercentage = tipRates[tipControl.selectedSegmentIndex]
         
@@ -389,7 +386,8 @@ class ViewController: UIViewController {
         tipLabel.text = currencyFormatter.stringFromNumber(tip)
         totalLabel.text = currencyFormatter.stringFromNumber(total)
     }
-    func getCurrencyCode(localeIdentifier: String) -> String {        var locale = NSLocale(localeIdentifier: localeIdentifier)
+    func getCurrencyCode(localeIdentifier: String) -> String {
+        var locale = NSLocale(localeIdentifier: localeIdentifier)
         var currencyCode : String? = locale.objectForKey(NSLocaleCurrencyCode) as? String
         if currencyCode == nil { return "" }
         

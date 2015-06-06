@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5989AAD31B22DD5100DA4B1D /* worldtip-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 5989AAD21B22DD5100DA4B1D /* worldtip-icon.png */; };
 		59E115CE1B13D44A00D3A765 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59E115CD1B13D44A00D3A765 /* AppDelegate.swift */; };
 		59E115D01B13D44A00D3A765 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59E115CF1B13D44A00D3A765 /* ViewController.swift */; };
 		59E115D31B13D44A00D3A765 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 59E115D11B13D44A00D3A765 /* Main.storyboard */; };
 		59E115D51B13D44A00D3A765 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 59E115D41B13D44A00D3A765 /* Images.xcassets */; };
 		59E115D81B13D44A00D3A765 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 59E115D61B13D44A00D3A765 /* LaunchScreen.xib */; };
 		59E115E41B13D44A00D3A765 /* tipsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59E115E31B13D44A00D3A765 /* tipsTests.swift */; };
-		59E115EE1B13E2E800D3A765 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 59E115ED1B13E2E800D3A765 /* README.md */; };
 		59E115F31B1444F600D3A765 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59E115F21B1444F600D3A765 /* SettingsViewController.swift */; };
 /* End PBXBuildFile section */
 
@@ -28,7 +28,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		59E115C81B13D44A00D3A765 /* tips.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = tips.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5989AAD21B22DD5100DA4B1D /* worldtip-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "worldtip-icon.png"; sourceTree = "<group>"; };
+		59E115C81B13D44A00D3A765 /* World Tipper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "World Tipper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		59E115CC1B13D44A00D3A765 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		59E115CD1B13D44A00D3A765 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		59E115CF1B13D44A00D3A765 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -73,7 +74,7 @@
 		59E115C91B13D44A00D3A765 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				59E115C81B13D44A00D3A765 /* tips.app */,
+				59E115C81B13D44A00D3A765 /* World Tipper.app */,
 				59E115DD1B13D44A00D3A765 /* tipsTests.xctest */,
 			);
 			name = Products;
@@ -82,6 +83,7 @@
 		59E115CA1B13D44A00D3A765 /* tips */ = {
 			isa = PBXGroup;
 			children = (
+				5989AAD21B22DD5100DA4B1D /* worldtip-icon.png */,
 				59E115F11B14018400D3A765 /* View Contollers */,
 				59E115CD1B13D44A00D3A765 /* AppDelegate.swift */,
 				59E115CF1B13D44A00D3A765 /* ViewController.swift */,
@@ -143,7 +145,7 @@
 			);
 			name = tips;
 			productName = tips;
-			productReference = 59E115C81B13D44A00D3A765 /* tips.app */;
+			productReference = 59E115C81B13D44A00D3A765 /* World Tipper.app */;
 			productType = "com.apple.product-type.application";
 		};
 		59E115DC1B13D44A00D3A765 /* tipsTests */ = {
@@ -209,6 +211,7 @@
 				59E115D31B13D44A00D3A765 /* Main.storyboard in Resources */,
 				59E115D81B13D44A00D3A765 /* LaunchScreen.xib in Resources */,
 				59E115D51B13D44A00D3A765 /* Images.xcassets in Resources */,
+				5989AAD31B22DD5100DA4B1D /* worldtip-icon.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -226,7 +229,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				59E115EE1B13E2E800D3A765 /* README.md in Sources */,
 				59E115D01B13D44A00D3A765 /* ViewController.swift in Sources */,
 				59E115CE1B13D44A00D3A765 /* AppDelegate.swift in Sources */,
 				59E115F31B1444F600D3A765 /* SettingsViewController.swift in Sources */,
@@ -355,7 +357,7 @@
 				INFOPLIST_FILE = tips/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "World Tipper";
 			};
 			name = Debug;
 		};
@@ -366,7 +368,7 @@
 				INFOPLIST_FILE = tips/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "World Tipper";
 			};
 			name = Release;
 		};

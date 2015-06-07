@@ -2,9 +2,7 @@
 
 This is a Tip Calculator application for iOS submitted as the [pre-assignment](https://gist.github.com/timothy1ee/7747214) requirement for CodePath.
 
-How it works:
-
-In addition to being a basic tip calculator, this app is able to convert to other currencies based on the input currency value, using realtime exchange rates retrieved from Yahoo Query Language.
+In addition to being a basic tip calculator, this app is able to convert the input value to other currencies using up-to-date exchange rates retrieved from Yahoo Query Language.
 
 Time spent: 12 hours
 
@@ -19,4 +17,4 @@ Completed:
 
 ![Video Walkthrough](worldtip-walkthrough.gif)
 
-Note: to embed the gif file, just check your gif file into your repo and update the name of the file above.
+GIF created with [LiceCap](http://www.cockos.com/licecap/).

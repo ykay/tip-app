@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		5989AAD31B22DD5100DA4B1D /* worldtip-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 5989AAD21B22DD5100DA4B1D /* worldtip-icon.png */; };
+		599E5F781B24DFF0000F0A55 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 599E5F771B24DFF0000F0A55 /* README.md */; };
 		59E115CE1B13D44A00D3A765 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59E115CD1B13D44A00D3A765 /* AppDelegate.swift */; };
 		59E115D01B13D44A00D3A765 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59E115CF1B13D44A00D3A765 /* ViewController.swift */; };
 		59E115D31B13D44A00D3A765 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 59E115D11B13D44A00D3A765 /* Main.storyboard */; };
@@ -29,6 +30,7 @@
 
 /* Begin PBXFileReference section */
 		5989AAD21B22DD5100DA4B1D /* worldtip-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "worldtip-icon.png"; sourceTree = "<group>"; };
+		599E5F771B24DFF0000F0A55 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		59E115C81B13D44A00D3A765 /* World Tipper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "World Tipper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		59E115CC1B13D44A00D3A765 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		59E115CD1B13D44A00D3A765 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -39,7 +41,6 @@
 		59E115DD1B13D44A00D3A765 /* tipsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = tipsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		59E115E21B13D44A00D3A765 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		59E115E31B13D44A00D3A765 /* tipsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tipsTests.swift; sourceTree = "<group>"; };
-		59E115ED1B13E2E800D3A765 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = tips/README.md; sourceTree = "<group>"; };
 		59E115F21B1444F600D3A765 /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -64,7 +65,7 @@
 		59E115BF1B13D44A00D3A765 = {
 			isa = PBXGroup;
 			children = (
-				59E115ED1B13E2E800D3A765 /* README.md */,
+				599E5F771B24DFF0000F0A55 /* README.md */,
 				59E115CA1B13D44A00D3A765 /* tips */,
 				59E115E01B13D44A00D3A765 /* tipsTests */,
 				59E115C91B13D44A00D3A765 /* Products */,
@@ -231,6 +232,7 @@
 			files = (
 				59E115D01B13D44A00D3A765 /* ViewController.swift in Sources */,
 				59E115CE1B13D44A00D3A765 /* AppDelegate.swift in Sources */,
+				599E5F781B24DFF0000F0A55 /* README.md in Sources */,
 				59E115F31B1444F600D3A765 /* SettingsViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

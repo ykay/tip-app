@@ -46,20 +46,23 @@ class ViewController: UIViewController {
     @IBOutlet weak var currentCurrencyCodeLabel: UILabel!
     @IBOutlet weak var currentExchangeRateLabel: UILabel!
     @IBOutlet weak var inputCurrencyCodeLabel: UILabel!
+    @IBOutlet weak var exchangeArrowLabel: UILabel!
     
     @IBOutlet weak var tipTitleLabel: UILabel!
     @IBOutlet weak var totalTitleLabel: UILabel!
+    @IBOutlet weak var exchangeRateTitleLabel: UILabel!
+    @IBOutlet weak var currencyTitleLabel: UILabel!
     @IBOutlet weak var inputReferenceLabel: UILabel!
     
     @IBOutlet weak var resultView: UIView!
     @IBOutlet weak var countryPickerView: UIView!
     
-    var defaultBackColor = UIColor(red: 249/255.0, green: 249/255.0, blue: 249/255.0, alpha: 1)
-    var defaultLightTextColor = UIColor(red: 164/255.0, green: 217/255.0, blue: 211/255.0, alpha: 1)
-    var defaultNormalTextColor = UIColor(red: 16/255.0, green: 133/255.0, blue: 117/255.0, alpha: 1)
-    var defaultDarkTextColor = UIColor(red: 4/255.0, green: 61/255.0, blue: 49/255.0, alpha: 1)
+    let defaultBackColor = UIColor(red: 249/255.0, green: 249/255.0, blue: 249/255.0, alpha: 1)
+    let defaultLightTextColor = UIColor(red: 164/255.0, green: 217/255.0, blue: 211/255.0, alpha: 1)
+    let defaultNormalTextColor = UIColor(red: 16/255.0, green: 133/255.0, blue: 117/255.0, alpha: 1)
+    let defaultDarkTextColor = UIColor(red: 4/255.0, green: 61/255.0, blue: 49/255.0, alpha: 1)
 
-    var defaultTitleNormalTextColor = UIColor(red: 98/255.0, green: 98/255.0, blue: 98/255.0, alpha: 1)
+    let defaultTitleNormalTextColor = UIColor(red: 98/255.0, green: 98/255.0, blue: 98/255.0, alpha: 1)
     
     var invertedBackColor = UIColor()
     var invertedLightTextColor = UIColor()
@@ -71,6 +74,7 @@ class ViewController: UIViewController {
     
     var userDefaults = NSUserDefaults()
     var currencyFormatter = NSNumberFormatter()
+    var defaultCountryIndex = Int()
     
     var inputCountryIndex = 0
     var inputBillAmount = Float()
@@ -88,7 +92,6 @@ class ViewController: UIViewController {
     func switchToDarkMode() {
         UIView.animateWithDuration(0.5, delay: 0.5, options: UIViewAnimationOptions.CurveEaseOut, animations: {
             self.resultView.backgroundColor = self.invertedBackColor
-            self.countryPickerView.backgroundColor = self.invertedBackColor
             self.view.backgroundColor = self.invertedBackColor
             }, completion: { (value: Bool) in
             self.switchTextToDarkMode()
@@ -103,6 +106,10 @@ class ViewController: UIViewController {
         UIView.animateWithDuration(0.5, delay: 0.5, options: UIViewAnimationOptions.CurveEaseOut, animations: {
             self.tipTitleLabel.textColor = self.invertedTitleNormalTextColor
             self.totalTitleLabel.textColor = self.invertedTitleNormalTextColor
+            self.exchangeRateTitleLabel.textColor = self.invertedTitleNormalTextColor
+            self.inputCurrencyCodeLabel.textColor = self.invertedTitleNormalTextColor
+            self.currentCurrencyCodeLabel.textColor = self.invertedTitleNormalTextColor
+            self.exchangeArrowLabel.textColor = self.invertedTitleNormalTextColor
             self.billField.textColor = self.invertedLightTextColor
             self.totalLabel.textColor = self.invertedLightTextColor
             }, completion: nil)
@@ -112,7 +119,6 @@ class ViewController: UIViewController {
         UIView.animateWithDuration(0.5, delay: 0.5, options: UIViewAnimationOptions.CurveEaseOut, animations: {
             self.view.backgroundColor = self.defaultBackColor
             self.resultView.backgroundColor = self.defaultBackColor
-            self.countryPickerView.backgroundColor = self.defaultBackColor
             }, completion: { (value: Bool) in
                 self.switchTextToLightMode()
             })
@@ -124,6 +130,10 @@ class ViewController: UIViewController {
         UIView.animateWithDuration(0.5, delay: 0.5, options: UIViewAnimationOptions.CurveEaseOut, animations: {
             self.tipTitleLabel.textColor = self.defaultTitleNormalTextColor
             self.totalTitleLabel.textColor = self.defaultTitleNormalTextColor
+            self.exchangeRateTitleLabel.textColor = self.defaultTitleNormalTextColor
+            self.inputCurrencyCodeLabel.textColor = self.defaultTitleNormalTextColor
+            self.currentCurrencyCodeLabel.textColor = self.defaultTitleNormalTextColor
+            self.exchangeArrowLabel.textColor = self.defaultTitleNormalTextColor
             self.billField.textColor = self.defaultDarkTextColor
             self.totalLabel.textColor = self.defaultDarkTextColor
             }, completion: nil)
@@ -134,6 +144,7 @@ class ViewController: UIViewController {
         var allLocales:Array<String> = NSLocale.availableLocaleIdentifiers() as Array<String>
         // Tracks country names so we don't add duplicates
         var duplicateFilter = Dictionary<String,Int>()
+        let defaultCountryName = getCountryNameFromLocaleIdentifier(NSLocale.currentLocale().localeIdentifier)
         
         for localeId in allLocales {
             var countryName = getCountryNameFromLocaleIdentifier(localeId)
@@ -146,6 +157,13 @@ class ViewController: UIViewController {
         }
         
         cultures = cultures.sorted { $0.name < $1.name }
+        
+        // Find the index of the country (current locale) after the array is sorted.
+        for index in 0...cultures.count-1 {
+            if (defaultCountryName == cultures[index].name) {
+                defaultCountryIndex = index
+            }
+        }
     }
     
     // Initialization
@@ -181,7 +199,7 @@ class ViewController: UIViewController {
             billField.text = NSString(format: "%.2f", userDefaults.floatForKey(Global.Settings.LastSetBillAmountKey))
         }
         else {
-            selectedCountryIndex = 237
+            selectedCountryIndex = defaultCountryIndex
             inputCountryIndex = selectedCountryIndex
             countryPicker.selectRow(selectedCountryIndex, inComponent: 0, animated: false)
             
@@ -250,6 +268,8 @@ class ViewController: UIViewController {
         
         tipControl.selectedSegmentIndex = userDefaults.integerForKey(Global.Settings.DefaultTipIndexKey)
         userDefaults.setInteger(tipControl.selectedSegmentIndex, forKey: Global.Settings.LastSetTipIndexKey)
+        
+        populateFields()
     }
 
     override func didReceiveMemoryWarning() {
@@ -278,9 +298,6 @@ class ViewController: UIViewController {
     }
     
     @IBAction func onEditingEnded(sender: AnyObject) {
-        if (darkMode) {
-            switchToLightMode()
-        }
         updateExchangeRateAndBillAmount(selectedCountryIndex)
     }
     
@@ -357,7 +374,12 @@ class ViewController: UIViewController {
         userDefaults.setObject(currentExchangeRateLabel.text, forKey: Global.Settings.LastSetExchangeRateKey)
 
     }
+    // Delegate: When country is changed.
     func pickerView(pickerView: UIPickerView!, didSelectRow row: Int, inComponent component: Int){
+        if (darkMode) {
+            switchToLightMode()
+        }
+        
         updateExchangeRateAndBillAmount(row)
         
         // Save current index so we know how to calculate the next conversion
@@ -385,6 +407,19 @@ class ViewController: UIViewController {
         
         tipLabel.text = currencyFormatter.stringFromNumber(tip)
         totalLabel.text = currencyFormatter.stringFromNumber(total)
+    }
+    func showProgressView() {
+        let alert = UIAlertController(title: nil, message: "Getting exchange rage...", preferredStyle:UIAlertControllerStyle.Alert)
+        
+        let spinner = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
+        spinner.center = CGPointMake(130.5, 65.5)
+        spinner.color = defaultDarkTextColor
+        spinner.startAnimating()
+        alert.view.addSubview(spinner)
+        presentViewController(alert, animated: false, completion: nil)
+    }
+    func hideProgressView() {
+        dismissViewControllerAnimated(false, completion: nil)
     }
     func getCurrencyCode(localeIdentifier: String) -> String {
         var locale = NSLocale(localeIdentifier: localeIdentifier)

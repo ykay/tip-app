@@ -21,7 +21,7 @@ class SettingsViewController: UIViewController {
         
         defaultTipControl.removeAllSegments()
         for (index, element) in enumerate(tipRates) {
-            defaultTipControl.insertSegmentWithTitle(NSString(format: "%.2f", element), atIndex: index, animated: false)
+            defaultTipControl.insertSegmentWithTitle(NSString(format: "%.2f", element) as String, atIndex: index, animated: false)
         }
         
         if (defaultTipIndex == -1) {

@@ -141,7 +141,7 @@ class ViewController: UIViewController {
 
     // Example getting info about NSLocale object (ref): http://stackoverflow.com/questions/6177309/nslocale-and-country-name
     func initializeValues() {
-        var allLocales:Array<String> = NSLocale.availableLocaleIdentifiers() as Array<String>
+        var allLocales:Array<String> = NSLocale.availableLocaleIdentifiers() as! Array<String>
         // Tracks country names so we don't add duplicates
         var duplicateFilter = Dictionary<String,Int>()
         let defaultCountryName = getCountryNameFromLocaleIdentifier(NSLocale.currentLocale().localeIdentifier)
@@ -196,7 +196,7 @@ class ViewController: UIViewController {
             countryPicker.selectRow(selectedCountryIndex, inComponent: 0, animated: false)
             
             inputBillAmount = userDefaults.floatForKey(Global.Settings.LastInputBillAmountKey)
-            billField.text = NSString(format: "%.2f", userDefaults.floatForKey(Global.Settings.LastSetBillAmountKey))
+            billField.text = NSString(format: "%.2f", userDefaults.floatForKey(Global.Settings.LastSetBillAmountKey)) as String
         }
         else {
             selectedCountryIndex = defaultCountryIndex
@@ -222,7 +222,7 @@ class ViewController: UIViewController {
         
         tipControl.removeAllSegments()
         for (index, element) in enumerate(tipRates) {
-            tipControl.insertSegmentWithTitle(NSString(format: "%.2f", element), atIndex: index, animated: false)
+            tipControl.insertSegmentWithTitle(NSString(format: "%.2f", element) as String, atIndex: index, animated: false)
         }
         
         tipControl.selectedSegmentIndex = userDefaults.integerForKey(Global.Settings.LastSetTipIndexKey)
@@ -331,7 +331,7 @@ class ViewController: UIViewController {
         if let exchangeRate = getExchangeRateFromLocaleIdentifier(cultures[countryIndex].localeIdentifier) {
             
             currentCurrencyCodeLabel.text = getCurrencyCode(cultures[countryIndex].localeIdentifier)
-            currentExchangeRateLabel.text = NSString(format: "(%.5f)", exchangeRate)
+            currentExchangeRateLabel.text = NSString(format: "(%.5f)", exchangeRate) as String
             
             showExchangeRateInfo()
             
@@ -358,7 +358,7 @@ class ViewController: UIViewController {
             billField.text = ""
         }
         else {
-            billField.text = NSString(format: "%.2f", billAmount)
+            billField.text = NSString(format: "%.2f", billAmount) as String
         }
         
         if (countryIndex != inputCountryIndex) {
@@ -409,7 +409,7 @@ class ViewController: UIViewController {
         totalLabel.text = currencyFormatter.stringFromNumber(total)
     }
     func showProgressView() {
-        let alert = UIAlertController(title: nil, message: "Getting exchange rage...", preferredStyle:UIAlertControllerStyle.Alert)
+        let alert = UIAlertController(title: nil, message: "Getting exchange rate...", preferredStyle:UIAlertControllerStyle.Alert)
         
         let spinner = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
         spinner.center = CGPointMake(130.5, 65.5)
